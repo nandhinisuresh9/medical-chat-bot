@@ -10,3 +10,4 @@ touch .env
 touch requirements.txt
 
 echo "directory structure created successfully"
+
