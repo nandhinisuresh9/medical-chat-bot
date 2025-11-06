@@ -20,5 +20,7 @@ def text_split(minimaldocs: List[Document]) -> List[str]:
     texts = text_splitter.split_documents(minimaldocs)
     return texts
 def download_embeddings():
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    #model = SentenceTransformer('pritamdeka/S-BioBert-snli-multinli-stsb')
+    embeddings = HuggingFaceEmbeddings(model_name="pritamdeka/S-BioBert-snli-multinli-stsb")
+    
     return embeddings
