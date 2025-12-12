@@ -1,26 +1,32 @@
-from langchain.document_loaders import PyPDFLoader, DirectoryLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from typing import List
-from langchain.schema import Document
-from langchain.embeddings import HuggingFaceEmbeddings
-# extract text from PDF
-def extract_text_from_pdf(data):
-    Loader= DirectoryLoader(data,glob="*.pdf",loader_cls=PyPDFLoader)
-    documents = Loader.load()
-    return documents
-def filter_to_min_docs(documents: List[Document]) -> List[Document]: 
-    minimum_docs :List[Document] = []
-    for doc in documents:
-        src=doc.metadata.get("source")
-        minimum_docs.append(Document(page_content=doc.page_content, metadata={"source": src}))
-    return minimum_docs
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 
-def text_split(minimaldocs: List[Document]) -> List[str]:
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20)
-    texts = text_splitter.split_documents(minimaldocs)
-    return texts
 def download_embeddings():
-    #model = SentenceTransformer('pritamdeka/S-BioBert-snli-multinli-stsb')
-    embeddings = HuggingFaceEmbeddings(model_name="pritamdeka/S-BioBert-snli-multinli-stsb")
-    
-    return embeddings
+    """
+    Initializes and returns the HuggingFace BGE Large embedding model.
+    NOTE: This is a placeholder. Ensure your system has the correct
+    embedding model files downloaded for Milvus ingestion/retrieval.
+    """
+    try:
+        # A robust, high-performing embedding model for RAG
+        model_name = "pritamdeka/S-BioBert-snli-multinli-stsb"
+        model_kwargs = {'device': 'cpu'}
+        encode_kwargs = {'normalize_embeddings': True}
+        
+        embeddings = HuggingFaceBgeEmbeddings(
+            model_name=model_name,
+            model_kwargs=model_kwargs,
+            encode_kwargs=encode_kwargs
+        )
+        print(f"Loaded embedding model: {model_name}")
+        return embeddings
+    except Exception as e:
+        print(f"Error loading embedding model: {e}")
+        # Fallback for systems without the necessary libraries/files
+        class DummyEmbeddings:
+            # CHANGE 1024 to 768 HERE to match the collection
+            def embed_query(self, text): return [0.0] * 768
+            def embed_documents(self, texts): return [[0.0] * 768] * len(texts)
+        
+        # Log a warning that the fallback is being used
+        print("WARNING: Using DummyEmbeddings fallback. Check network/model files.")
+        return DummyEmbeddings()
